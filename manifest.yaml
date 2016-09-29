@@ -1,0 +1,55 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: app-config-v2
+data:
+  # Used to authenticate the hub to the proxy. This string was generated with `pwgen 64`.
+  # Please generate a new one for your own deployment!
+  some.thing: wcat2
+---
+# We put services before deployments, so that the env variables required to discover
+# the services' IPs are present in the containers when they start. If we don't do this,
+# it is possible some pods will get created before the service objects exist, and will
+# not get the appropriate env variables until a restart.
+apiVersion: v1
+kind: Service
+metadata:
+  name: apache2-service
+spec:
+  selector:
+    name: apache2-pod
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: apache2-deployment
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        name: apache2-pod
+    spec:
+      containers:
+      - name: apache2
+        image: yuvipanda/apache2-demo:v1
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        env:
+          - name: SOME_THING
+            valueFrom:
+              configMapKeyRef:
+                name: app-config-v2
+                key: some.thing
+        ports:
+          - containerPort: 80
+            name: apache2

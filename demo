@@ -1,0 +1,13 @@
+1. Show PHP file
+2. Show dockerfile
+3. Show manifest
+4. Very quick explanation of 'objects' in k8s
+5. Deployment object explanation
+7. Configmap object explanation
+6. Service object explanation
+8. kubectl apply!
+9. Show that it works
+10. Scale up
+11. Do a deployment
+12. Do a failed deployment
+13. Roll back deployment
